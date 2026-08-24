@@ -1,0 +1,7 @@
+[
+  {"faa":"BQN","name":"Rafael Hernandez Airport","lat":18.4949,"lon":-67.1294,"alt":237,"tz":-4,"dst":"U","tzone":"America/Puerto_Rico","source":"supplemental"},
+  {"faa":"PSE","name":"Mercedita Airport","lat":18.0083,"lon":-66.5630,"alt":29,"tz":-4,"dst":"U","tzone":"America/Puerto_Rico","source":"supplemental"},
+  {"faa":"SJU","name":"Luis Munoz Marin International Airport","lat":18.4394,"lon":-66.0018,"alt":9,"tz":-4,"dst":"U","tzone":"America/Puerto_Rico","source":"supplemental"},
+  {"faa":"STT","name":"Cyril E. King Airport","lat":18.3373,"lon":-64.9734,"alt":23,"tz":-4,"dst":"U","tzone":"America/St_Thomas","source":"supplemental"}
+]
+
