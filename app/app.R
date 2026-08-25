@@ -11,6 +11,23 @@ suppressPackageStartupMessages({
   library(tidyr)
 })
 
+# Modules d'analyse (un fichier par carte Trello, voir script_r/analyse_*.R
+# pour les versions CLI équivalentes avec impressions commentées).
+# - Dans le conteneur shiny_traffic : copiés à /script_r/modules (racine).
+# - En local (docker compose --profile analysis / lancement direct) :
+#   app/ et script_r/ sont deux dossiers frères à la racine du repo.
+candidate_dirs <- c(
+  "/script_r/modules",
+  file.path(dirname(getwd()), "script_r", "modules"),
+  file.path("script_r", "modules")
+)
+modules_dir <- candidate_dirs[which(dir.exists(candidate_dirs))[1]]
+if (is.na(modules_dir)) stop("Introuvable : dossier des modules Shiny (script_r/modules).")
+source(file.path(modules_dir, "mod_jours_speciaux.R"))
+source(file.path(modules_dir, "mod_rattrapage_retards.R"))
+source(file.path(modules_dir, "mod_vitesse_distance.R"))
+source(file.path(modules_dir, "mod_distance_retard.R"))
+
 colors <- c(EWR = "#2563EB", JFK = "#E11D48", LGA = "#059669")
 mongo_uri <- Sys.getenv("MONGODB_URI")
 mongo_db <- Sys.getenv("MONGO_CLEAN_DB", unset = "nyc_flights_cleaned")
@@ -177,7 +194,11 @@ ui <- fluidPage(
           "Qualité des données",
           uiOutput("coverage_warning"),
           DTOutput("quality_table")
-        )
+        ),
+        tabPanel("Jours spéciaux", jours_speciaux_ui("jours_speciaux")),
+        tabPanel("Rattrapage des retards", rattrapage_retards_ui("rattrapage_retards")),
+        tabPanel("Vitesse & distance", vitesse_distance_ui("vitesse_distance")),
+        tabPanel("Distance & retard", distance_retard_ui("distance_retard"))
       )
     )
   )
@@ -295,6 +316,11 @@ server <- function(input, output, session) {
     if (nrow(incomplete) == 0L) return(NULL)
     div(class = "alert alert-warning", "Les périodes incomplètes sont exclues des moyennes, croissances et pics.")
   })
+
+  jours_speciaux_server("jours_speciaux", mongo_uri, mongo_db)
+  rattrapage_retards_server("rattrapage_retards", mongo_uri, mongo_db)
+  vitesse_distance_server("vitesse_distance", mongo_uri, mongo_db)
+  distance_retard_server("distance_retard", mongo_uri, mongo_db)
 }
 
 shinyApp(ui, server)

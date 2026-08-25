@@ -13,10 +13,14 @@ RUN install2.r \
     --skipinstalled \
     --ncpus -1 \
     dplyr \
+    ggplot2 \
     jsonlite \
+    lubridate \
     mongolite \
+    scales \
     stringr \
     tibble \
+    tidyr \
     && rm -rf /tmp/downloaded_packages
 
 WORKDIR /workspace
