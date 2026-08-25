@@ -20,6 +20,16 @@ Ces commandes vont:
 - Exécuter le conteneur importer avec le profil "import" pour charger les données initiales
 - Nettoyer le conteneur importer après l'exécution (`--rm`)
 
+### 3.Nettoyer les données et les contrôler
+```bash
+ docker compose --env-file .env --profile analysis run --rm \
+  r-analysis \
+  Rscript /workspace/script_r/clean_data.R 
+```
+
+Ce script va créer une nouvelle base de données `nyc_flights_cleaned` avec les collections nettoyées et prêtes à l'analyse.
+Une collection `data_quality_reports` sera également créée pour stocker les rapports de qualité des données.
+
 ## Connexion via MongoDB Compass
 
 MongoDB Compass est une interface graphique pour gérer et explorer votre base de données MongoDB.
