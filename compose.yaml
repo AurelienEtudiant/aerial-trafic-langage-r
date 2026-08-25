@@ -32,7 +32,24 @@ services:
       mongodb:
         condition: service_healthy
     environment:
-      MONGODB_URI: mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=${MONGO_DB}
+      MONGODB_URI: mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@mongodb:27017/${MONGO_SOURCE_DB}?authSource=${MONGO_SOURCE_DB}
+
+  r-analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile.r
+    profiles: [ "analysis" ]
+    env_file:
+      - .env
+    environment:
+      MONGODB_URI: mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@mongodb:27017/${MONGO_SOURCE_DB}?authSource=${MONGO_SOURCE_DB}
+    volumes:
+      - ./script_r:/workspace/script_r:ro
+      - ./data:/workspace/data:ro
+      - ./output:/workspace/output
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
 volumes:
   mongo_data:
