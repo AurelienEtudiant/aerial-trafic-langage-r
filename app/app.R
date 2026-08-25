@@ -23,7 +23,21 @@ candidate_dirs <- c(
 )
 modules_dir <- candidate_dirs[which(dir.exists(candidate_dirs))[1]]
 if (is.na(modules_dir)) stop("Introuvable : dossier des modules Shiny (script_r/modules).")
+
+# En local, exposer les graphiques générés dans output/. Dans le conteneur,
+# Docker les copie directement dans /app/www/output, déjà servi par Shiny.
+output_candidates <- c(
+  "/app/www/output",
+  file.path(dirname(getwd()), "output"),
+  file.path("output")
+)
+static_output_dir <- output_candidates[which(dir.exists(output_candidates))[1]]
+if (!is.na(static_output_dir) && normalizePath(static_output_dir) != normalizePath(file.path(getwd(), "www", "output"), mustWork = FALSE)) {
+  addResourcePath("output", static_output_dir)
+}
+
 source(file.path(modules_dir, "mod_jours_speciaux.R"))
+source(file.path(modules_dir, "mod_analyse_retards.R"), encoding = "UTF-8")
 source(file.path(modules_dir, "mod_rattrapage_retards.R"))
 source(file.path(modules_dir, "mod_vitesse_distance.R"))
 source(file.path(modules_dir, "mod_distance_retard.R"))
@@ -140,6 +154,10 @@ ui <- fluidPage(
       .metric-title { color: #64748b; font-size: 13px; }
       .metric-value { font-size: 27px; font-weight: 750; margin-top: 5px; }
       .metric-detail { color: #475569; font-size: 12px; margin-top: 3px; }
+      .analysis-card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 18px; margin-bottom: 18px; }
+      .analysis-card h4 { margin-top: 0; }
+      .analysis-image { display: block; width: 100%; height: auto; margin: 10px auto 14px; }
+      .analysis-interpretation { color: #475569; margin-bottom: 0; line-height: 1.55; }
       .nav-tabs { border-bottom: 1px solid #cbd5e1; }
       .tab-content { background: white; border: 1px solid #e2e8f0; border-top: 0; padding: 18px; border-radius: 0 0 14px 14px; }
       @media(max-width: 900px) { .metric-grid { grid-template-columns: repeat(2,1fr); } }
@@ -196,6 +214,7 @@ ui <- fluidPage(
           DTOutput("quality_table")
         ),
         tabPanel("Jours spéciaux", jours_speciaux_ui("jours_speciaux")),
+        tabPanel("Analyse des retards", analyse_retards_ui("analyse_retards")),
         tabPanel("Rattrapage des retards", rattrapage_retards_ui("rattrapage_retards")),
         tabPanel("Vitesse & distance", vitesse_distance_ui("vitesse_distance")),
         tabPanel("Distance & retard", distance_retard_ui("distance_retard"))
@@ -318,6 +337,7 @@ server <- function(input, output, session) {
   })
 
   jours_speciaux_server("jours_speciaux", mongo_uri, mongo_db)
+  analyse_retards_server("analyse_retards", mongo_uri, mongo_db)
   rattrapage_retards_server("rattrapage_retards", mongo_uri, mongo_db)
   vitesse_distance_server("vitesse_distance", mongo_uri, mongo_db)
   distance_retard_server("distance_retard", mongo_uri, mongo_db)
