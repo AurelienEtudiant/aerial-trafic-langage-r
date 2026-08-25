@@ -4,5 +4,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY scripts ./scripts
 COPY data ./data
-CMD ["python", "scripts/import_to_mongodb.py", "--source", "data"]
+CMD ["python", "data_import_scripts/import_to_mongodb.py", "--source", "data"]
 
