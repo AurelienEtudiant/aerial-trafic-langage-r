@@ -22,11 +22,11 @@ services:
   importer:
     build:
       context: .
-      dockerfile: Dockerfile.importer
+      dockerfile: dockerfiles/Dockerfile.importer
     profiles: ["import"]
     env_file: .env
     volumes:
-      - ./scripts:/app/scripts:ro
+      - ./data_import_scripts:/app/data_import_scripts:ro
       - ./data:/app/data:ro
     depends_on:
       mongodb:
@@ -37,7 +37,7 @@ services:
   r-analysis:
     build:
       context: .
-      dockerfile: Dockerfile.r
+      dockerfile: dockerfiles/Dockerfile.r
     profiles: [ "analysis" ]
     env_file:
       - .env
@@ -50,6 +50,23 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+
+  traffic-dashboard:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.shiny_traffic
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MONGODB_URI: "mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@mongodb:27017/${MONGO_SOURCE_DB}?authSource=${MONGO_SOURCE_DB}"
+      MONGO_CLEAN_DB: ${MONGO_CLEAN_DB}
+    ports:
+      - "127.0.0.1:3838:3838"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
 
 volumes:
   mongo_data:
