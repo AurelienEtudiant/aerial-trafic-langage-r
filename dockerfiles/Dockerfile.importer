@@ -2,7 +2,7 @@ FROM python:3.12-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY scripts ./scripts
+COPY data_import_scripts ./data_import_scripts
 COPY data ./data
 CMD ["python", "data_import_scripts/import_to_mongodb.py", "--source", "data"]
 
