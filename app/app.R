@@ -23,10 +23,23 @@ candidate_dirs <- c(
 )
 modules_dir <- candidate_dirs[which(dir.exists(candidate_dirs))[1]]
 if (is.na(modules_dir)) stop("Introuvable : dossier des modules Shiny (script_r/modules).")
+
+# Rendre les graphiques produits par les scripts accessibles aussi bien dans
+# le conteneur Docker que lors d'un lancement local depuis le dépôt.
+candidate_output_dirs <- c(
+  "/app/www/output",
+  file.path(dirname(getwd()), "output"),
+  file.path("output")
+)
+static_output_dir <- candidate_output_dirs[which(dir.exists(candidate_output_dirs))[1]]
+if (is.na(static_output_dir)) stop("Introuvable : dossier des graphiques (output).")
+addResourcePath("output", static_output_dir)
+
 source(file.path(modules_dir, "mod_jours_speciaux.R"))
 source(file.path(modules_dir, "mod_rattrapage_retards.R"))
 source(file.path(modules_dir, "mod_vitesse_distance.R"))
 source(file.path(modules_dir, "mod_distance_retard.R"))
+source(file.path(modules_dir, "mod_donnees_manquantes.R"))
 
 colors <- c(EWR = "#2563EB", JFK = "#E11D48", LGA = "#059669")
 mongo_uri <- Sys.getenv("MONGODB_URI")
@@ -198,7 +211,8 @@ ui <- fluidPage(
         tabPanel("Jours spéciaux", jours_speciaux_ui("jours_speciaux")),
         tabPanel("Rattrapage des retards", rattrapage_retards_ui("rattrapage_retards")),
         tabPanel("Vitesse & distance", vitesse_distance_ui("vitesse_distance")),
-        tabPanel("Distance & retard", distance_retard_ui("distance_retard"))
+        tabPanel("Distance & retard", distance_retard_ui("distance_retard")),
+        tabPanel("Données manquantes", donnees_manquantes_ui("donnees_manquantes"))
       )
     )
   )
@@ -321,6 +335,7 @@ server <- function(input, output, session) {
   rattrapage_retards_server("rattrapage_retards", mongo_uri, mongo_db)
   vitesse_distance_server("vitesse_distance", mongo_uri, mongo_db)
   distance_retard_server("distance_retard", mongo_uri, mongo_db)
+  donnees_manquantes_server("donnees_manquantes", mongo_uri, mongo_db)
 }
 
 shinyApp(ui, server)

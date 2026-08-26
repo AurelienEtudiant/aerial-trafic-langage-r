@@ -27,6 +27,7 @@ RUN install2.r \
 WORKDIR /app
 COPY app/app.R /app/app.R
 COPY script_r/modules /script_r/modules
+COPY output/pourcentage_valeurs_manquantes.png /app/www/output/pourcentage_valeurs_manquantes.png
 
 EXPOSE 3838
 HEALTHCHECK CMD Rscript -e "x <- url('http://127.0.0.1:3838'); open(x); close(x)" || exit 1
