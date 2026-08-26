@@ -198,7 +198,8 @@ ui <- fluidPage(
         tabPanel("Jours spéciaux", jours_speciaux_ui("jours_speciaux")),
         tabPanel("Rattrapage des retards", rattrapage_retards_ui("rattrapage_retards")),
         tabPanel("Vitesse & distance", vitesse_distance_ui("vitesse_distance")),
-        tabPanel("Distance & retard", distance_retard_ui("distance_retard"))
+        tabPanel("Distance & retard", distance_retard_ui("distance_retard")),
+        tabPanel("Périodes spéciales", specialPeriodsUI("special"))
       )
     )
   )
@@ -316,7 +317,14 @@ server <- function(input, output, session) {
     if (nrow(incomplete) == 0L) return(NULL)
     div(class = "alert alert-warning", "Les périodes incomplètes sont exclues des moyennes, croissances et pics.")
   })
-
+   specialPeriodsServer(
+       "special",
+       mongo_uri = mongo_uri,
+       database = mongo_db,
+       selected_airports = reactive(input$airports),
+       refresh_signal = reactive(input$refresh),
+       colors = colors
+     )
   jours_speciaux_server("jours_speciaux", mongo_uri, mongo_db)
   rattrapage_retards_server("rattrapage_retards", mongo_uri, mongo_db)
   vitesse_distance_server("vitesse_distance", mongo_uri, mongo_db)
